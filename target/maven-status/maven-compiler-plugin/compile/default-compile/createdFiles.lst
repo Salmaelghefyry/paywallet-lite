@@ -1,0 +1,12 @@
+com\paylogic\paywalletlite\domain\identity\enums\KYCLevel.class
+com\paylogic\paywalletlite\domain\identity\enums\AccountStatus.class
+com\paylogic\paywalletlite\config\root\AppConfig.class
+com\paylogic\paywalletlite\config\root\PropertyConfig.class
+com\paylogic\paywalletlite\config\database\DataSourceConfig.class
+com\paylogic\paywalletlite\domain\identity\enums\DevicePlatform.class
+com\paylogic\paywalletlite\domain\identity\KYCProfile.class
+com\paylogic\paywalletlite\domain\identity\Device.class
+com\paylogic\paywalletlite\domain\identity\User.class
+com\paylogic\paywalletlite\config\database\JpaConfig.class
+com\paylogic\paywalletlite\config\root\RootConfig.class
+com\paylogic\paywalletlite\domain\identity\enums\DeviceStatus.class
