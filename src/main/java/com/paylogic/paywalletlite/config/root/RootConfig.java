@@ -13,7 +13,10 @@ import org.springframework.context.annotation.Import;
         "com.paylogic.paywalletlite.security",
         "com.paylogic.paywalletlite.util",
         "com.paylogic.paywalletlite.validation",
+        "com.paylogic.paywalletlite.config.crypto",
         "com.paylogic.paywalletlite.config.database",
+        "com.paylogic.paywalletlite.config.kafka",
+        "com.paylogic.paywalletlite.config.scheduling",
         "com.paylogic.paywalletlite.config.security"
 })
 @Import({

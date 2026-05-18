@@ -55,6 +55,13 @@ public class Wallet {
     @Column(name = "current_keypair_id")
     private UUID currentKeypairId;
 
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     public Wallet() {
         this.createdAt = LocalDateTime.now();
         this.status = WalletStatus.ACTIVE;
@@ -102,4 +109,10 @@ public class Wallet {
 
     public UUID getCurrentKeypairId() { return currentKeypairId; }
     public void setCurrentKeypairId(UUID currentKeypairId) { this.currentKeypairId = currentKeypairId; }
+
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

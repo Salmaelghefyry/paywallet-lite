@@ -1,75 +1,32 @@
 package com.paylogic.paywalletlite.config.web;
 
 import com.paylogic.paywalletlite.config.root.RootConfig;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRegistration;
-import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import jakarta.servlet.Filter;
 import org.springframework.web.filter.CharacterEncodingFilter;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-public class WebAppInitializer implements WebApplicationInitializer {
+public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[] { RootConfig.class };
+    }
 
-        /*
-         * ============================================================
-         * ROOT APPLICATION CONTEXT
-         * Services, repositories, security, database...
-         * ============================================================
-         */
-        AnnotationConfigWebApplicationContext rootContext =
-                new AnnotationConfigWebApplicationContext();
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class[] { WebConfig.class };
+    }
 
-        rootContext.register(RootConfig.class);
+    @Override
+    protected String[] getServletMappings() {
+        return new String[] { "/" };
+    }
 
-        servletContext.addListener(
-                new ContextLoaderListener(rootContext)
-        );
-
-        /*
-         * ============================================================
-         * WEB MVC CONTEXT
-         * Controllers REST + Spring MVC
-         * ============================================================
-         */
-        AnnotationConfigWebApplicationContext webContext =
-                new AnnotationConfigWebApplicationContext();
-
-        webContext.register(WebConfig.class);
-
-        DispatcherServlet dispatcherServlet =
-                new DispatcherServlet(webContext);
-
-        ServletRegistration.Dynamic dispatcher =
-                servletContext.addServlet("dispatcher", dispatcherServlet);
-
-        dispatcher.setLoadOnStartup(1);
-
-        dispatcher.addMapping("/api/*");
-
-        /*
-         * ============================================================
-         * UTF-8 ENCODING FILTER
-         * ============================================================
-         */
-        CharacterEncodingFilter encodingFilter =
-                new CharacterEncodingFilter();
-
+    @Override
+    protected Filter[] getServletFilters() {
+        CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
         encodingFilter.setEncoding("UTF-8");
         encodingFilter.setForceEncoding(true);
-
-        servletContext.addFilter("encodingFilter", encodingFilter)
-                .addMappingForUrlPatterns(null, false, "/*");
-
-        /*
-         * ============================================================
-         * SESSION CONFIG
-         * ============================================================
-         */
-        servletContext.setSessionTimeout(30);
+        return new Filter[] { encodingFilter };
     }
 }

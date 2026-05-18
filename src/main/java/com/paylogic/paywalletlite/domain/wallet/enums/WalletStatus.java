@@ -23,6 +23,10 @@ public enum WalletStatus {
     /** Portefeuille définitivement fermé. Action irréversible. */
     CLOSED,
 
+    /**status lors de la creation de la wallet avant l'approval */
+    PENDING_APPROVAL,
+    REJECTED,
+
     /**
      * Portefeuille gelé par décision administrative ou judiciaire.
      * Les fonds sont conservés mais inaccessibles jusqu'à résolution.
