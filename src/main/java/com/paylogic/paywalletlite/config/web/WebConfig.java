@@ -27,7 +27,6 @@ import java.util.TimeZone;
 @EnableWebMvc
 @ComponentScan(basePackages = "com.paylogic.paywalletlite.controller")
 public class WebConfig implements WebMvcConfigurer {
-
     /**
      * Configure la négociation de contenu - JSON par défaut
      */
@@ -101,5 +100,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
+
+    }
+    public WebConfig() {
+        System.out.println("========================================");
+        System.out.println(" WebConfig chargé !");
+        System.out.println(" Package: " + this.getClass().getPackage().getName());
+        System.out.println("========================================");
     }
 }
