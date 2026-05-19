@@ -10,13 +10,14 @@ import org.springframework.context.annotation.Import;
 @ComponentScan(basePackages = {
         "com.paylogic.paywalletlite.service",
         "com.paylogic.paywalletlite.repository",
-        "com.paylogic.paywalletlite.security",
         "com.paylogic.paywalletlite.util",
         "com.paylogic.paywalletlite.validation",
         "com.paylogic.paywalletlite.config.crypto",
         "com.paylogic.paywalletlite.config.database",
         "com.paylogic.paywalletlite.config.kafka",
         "com.paylogic.paywalletlite.config.scheduling",
+        "com.paylogic.paywalletlite.config.security",
+        "com.paylogic.paywalletlite.security",           // 🔥 JwtTokenProvider + crypto
         "com.paylogic.paywalletlite.config.security"
 })
 @Import({

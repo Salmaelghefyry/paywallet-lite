@@ -1,5 +1,26 @@
 package com.paylogic.paywalletlite.exception;
 // exception/BusinessException.java
+
 public class BusinessException extends RuntimeException {
-    public BusinessException(String message) { super(message); }
+
+    private final String errorCode;
+
+    public BusinessException(String message) {
+        super(message);
+        this.errorCode = "BUSINESS_ERROR";
+    }
+
+    public BusinessException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public BusinessException(String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = "BUSINESS_ERROR";
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
 }
