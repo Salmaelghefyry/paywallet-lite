@@ -1,5 +1,6 @@
 package com.paylogic.paywalletlite.dto.response;
 
+
 import com.paylogic.paywalletlite.domain.wallet.enums.WalletStatus;
 import com.paylogic.paywalletlite.domain.wallet.enums.WalletType;
 
@@ -22,6 +23,9 @@ public class WalletResponseDto implements Serializable {
     private LocalDateTime createdAt;
     private String publicKey;
     private String rejectionReason;
+
+    // Config imbriquée pour afficher les limites directement
+    private WalletConfigResponseDto config;
 
     public UUID getWalletId() {
         return walletId;
@@ -102,4 +106,7 @@ public class WalletResponseDto implements Serializable {
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
     }
+    // Nouveau getter/setter
+    public WalletConfigResponseDto getConfig() { return config; }
+    public void setConfig(WalletConfigResponseDto config) { this.config = config; }
 }

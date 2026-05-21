@@ -4,7 +4,7 @@ import com.paylogic.paywalletlite.domain.identity.enums.AccountStatus;
 import com.paylogic.paywalletlite.domain.identity.enums.KYCStatus;
 import com.paylogic.paywalletlite.domain.identity.enums.RoleType;
 import com.paylogic.paywalletlite.domain.wallet.Wallet;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 

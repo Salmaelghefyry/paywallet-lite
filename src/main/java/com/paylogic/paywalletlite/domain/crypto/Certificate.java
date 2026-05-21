@@ -1,7 +1,7 @@
 package com.paylogic.paywalletlite.domain.crypto;
 
 import com.paylogic.paywalletlite.domain.crypto.enums.CertificateStatus;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;

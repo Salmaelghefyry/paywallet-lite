@@ -2,7 +2,7 @@ package com.paylogic.paywalletlite.domain.token;
 
 import com.paylogic.paywalletlite.domain.token.enums.AllocationMode;
 import com.paylogic.paywalletlite.domain.token.enums.TokenStatus;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;

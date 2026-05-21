@@ -1,9 +1,6 @@
 package com.paylogic.paywalletlite.config.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,7 +33,7 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenValidity);
 
-        var builder = Jwts.builder()
+        JwtBuilder builder = Jwts.builder()
                 .setSubject(userId)
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(now)

@@ -1,7 +1,7 @@
 package com.paylogic.paywalletlite.config.web;
 
 import com.paylogic.paywalletlite.config.root.RootConfig;
-import jakarta.servlet.Filter;
+import javax.servlet.Filter;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 

@@ -1,6 +1,6 @@
 package com.paylogic.paywalletlite.domain.token;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;

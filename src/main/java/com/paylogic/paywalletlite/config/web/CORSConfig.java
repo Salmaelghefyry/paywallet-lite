@@ -7,12 +7,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
-/**
- * Configuration CORS (Cross-Origin Resource Sharing).
- * Permet les requêtes depuis l'application mobile Flutter.
- */
 @Configuration
 public class CORSConfig {
 
@@ -20,19 +15,18 @@ public class CORSConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Origines autorisées (Flutter mobile + debug)
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost",
                 "http://localhost:8080",
-                "capacitor://localhost",  // Ionic/Capacitor
+                "capacitor://localhost",
                 "ionic://localhost",
-                "http://localhost:8100"   // Ionic dev server
+                "http://localhost:8100"
         ));
 
-        // Méthodes HTTP autorisées
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
 
-        // Headers autorisés
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
@@ -41,14 +35,15 @@ public class CORSConfig {
                 "Origin"
         ));
 
-        // Exposition des headers
-        configuration.setExposedHeaders(List.of("Authorization", "X-Auth-Token"));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization", "X-Auth-Token"
+        ));
 
-        // Credentials (cookies, auth)
-        configuration.setAllowCredentials(true);
+        // Spring 5.3 attend Boolean (wrapper), pas boolean primitif
+        configuration.setAllowCredentials(Boolean.TRUE);
 
-        // Durée du cache preflight
-        configuration.setMaxAge(3600L);
+        // Spring 5.3 attend Long (wrapper), pas long primitif
+        configuration.setMaxAge(Long.valueOf(3600L));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

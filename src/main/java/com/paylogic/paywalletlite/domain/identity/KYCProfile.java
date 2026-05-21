@@ -1,7 +1,7 @@
 package com.paylogic.paywalletlite.domain.identity;
 
 import com.paylogic.paywalletlite.domain.identity.enums.KYCStatus;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;

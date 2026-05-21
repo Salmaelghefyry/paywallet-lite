@@ -1,7 +1,7 @@
 package com.paylogic.paywalletlite.domain.risk;
 
 import com.paylogic.paywalletlite.domain.risk.enums.RiskLevel;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
@@ -15,10 +15,10 @@ public class RiskProfile {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "profile_id", updatable = false, nullable = false)
+    @Column(name = "profile_id", updatable = false, nullable = false, columnDefinition = "RAW(16)")
     private UUID profileId;
 
-    @Column(name = "wallet_id", nullable = false)
+    @Column(name = "wallet_id", nullable = false, columnDefinition = "RAW(16)")
     private UUID walletId;
 
     @Column(name = "risk_score")
@@ -28,7 +28,7 @@ public class RiskProfile {
     @Column(name = "level", nullable = false, length = 20)
     private RiskLevel level;
 
-    @Column(name = "assessed_at", nullable = false)
+    @Column(name = "assessed_at", nullable = false, columnDefinition = "DATE")
     private LocalDateTime assessedAt;
 
     @Column(name = "assessed_by", length = 100)
