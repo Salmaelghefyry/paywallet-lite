@@ -419,3 +419,426 @@ paywallet-lite-backend/
 ├── LICENSE
 ├── pom.xml                                                             # Maven parent
 └── docker-compose.yml                                                  # Stack local (Oracle XE, Kafka, Zookeeper)
+
+
+paywallet-lite-mobile/
+├── 📁 android/                                    # Configuration Android native
+│   ├── 📁 app/
+│   │   ├── 📁 src/
+│   │   │   ├── 📁 main/
+│   │   │   │   ├── 📁 kotlin/com/paylogic/paywalletlite/    # Kotlin (recommandé vs Java)
+│   │   │   │   │   ├── MainActivity.kt
+│   │   │   │   │   └── 📁 plugins/
+│   │   │   │   │       ├── SecureStoragePlugin.kt           # Android Keystore integration
+│   │   │   │   │       ├── NfcHcePlugin.kt                  # NFC Host Card Emulation
+│   │   │   │   │       └── QrCodePlugin.kt                  # Camera/QR native optimizations
+│   │   │   │   ├── 📁 res/
+│   │   │   │   │   ├── 📁 xml/
+│   │   │   │   │   │   └── network_security_config.xml      # Cert pinning config
+│   │   │   │   │   └── 📁 values/
+│   │   │   │   │       └── strings.xml
+│   │   │   │   └── AndroidManifest.xml
+│   │   │   └── 📁 profile/
+│   │   │       └── AndroidManifest.xml
+│   │   ├── build.gradle
+│   │   └── 📁 proguard-rules.pro
+│   ├── 📁 gradle/wrapper/
+│   ├── build.gradle
+│   └── settings.gradle
+│
+├── 📁 ios/                                        # Configuration iOS native
+│   ├── 📁 Runner/
+│   │   ├── AppDelegate.swift
+│   │   ├── Runner-Bridging-Header.h
+│   │   ├── Info.plist
+│   │   └── 📁 Plugins/
+│   │       ├── SecureStoragePlugin.swift          # iOS Keychain/Secure Enclave
+│   │       └── QrCodePlugin.swift
+│   ├── 📁 Runner.xcworkspace/
+│   ├── 📁 Podfile
+│   └── 📁 Flutter/
+│
+├── 📁 lib/                                        # CODE FLUTTER PRINCIPAL
+│   │
+│   ├── main.dart                                  # Point d'entrée + initialisation
+│   │
+│   ├── 📁 app/                                    # Configuration globale de l'app
+│   │   ├── 📁 config/
+│   │   │   ├── app_config.dart                    # Environnements (dev/staging/prod)
+│   │   │   ├── api_config.dart                    # URLs backend, timeouts, retries
+│   │   │   ├── crypto_config.dart                 # Algorithmes, key sizes, rotation
+│   │   │   └── offline_config.dart                # Limites offline, TTL tokens, sync intervals
+│   │   ├── 📁 constants/
+│   │   │   ├── api_constants.dart                 # Endpoints, versions, headers
+│   │   │   ├── storage_constants.dart             # Keys SharedPreferences/SQLCipher
+│   │   │   ├── crypto_constants.dart              # Curves, algorithms, key aliases
+│   │   │   ├── ui_constants.dart                  # Durations, animations, breakpoints
+│   │   │   └── error_constants.dart               # Codes erreur métier
+│   │   ├── 📁 theme/
+│   │   │   ├── app_theme.dart                     # ThemeData global
+│   │   │   ├── app_colors.dart                    # Palette PayLogic
+│   │   │   ├── app_typography.dart                # TextStyles
+│   │   │   ├── app_dimensions.dart                # Spacing, radius, elevations
+│   │   │   └── app_icons.dart                     # Iconography
+│   │   └── 📁 localization/
+│   │       ├── app_localizations.dart             # Delegate + setup
+│   │       ├── intl_fr.arb                        # Français (marchés cibles)
+│   │       ├── intl_en.arb                        # Anglais
+│   │       └── intl_ar.arb                        # Arabe (Maroc, Moyen-Orient)
+│   │
+│   ├── 📁 core/                                   # FONDATION TECHNIQUE
+│   │   ├── 📁 errors/
+│   │   │   ├── app_exception.dart                 # Classe de base
+│   │   │   ├── network_exceptions.dart            # NoConnection, Timeout, ServerError
+│   │   │   ├── auth_exceptions.dart               # InvalidPin, SessionExpired, BiometricFailed
+│   │   │   ├── crypto_exceptions.dart             # SignatureInvalid, KeyCorrupted, TokenExpired
+│   │   │   ├── sync_exceptions.dart               # SyncConflict, SyncRejected, CheckpointLost
+│   │   │   ├── validation_exceptions.dart         # InsufficientFunds, LimitExceeded
+│   │   │   └── error_handler.dart                 # Mapping exception → message utilisateur
+│   │   ├── 📁 utils/
+│   │   │   ├── date_utils.dart
+│   │   │   ├── number_utils.dart                  # Formatage monétaire XOF/MAD
+│   │   │   ├── string_utils.dart
+│   │   │   ├── uuid_utils.dart
+│   │   │   ├── device_utils.dart                  # Info device, OS version
+│   │   │   └── connectivity_utils.dart            # État réseau détaillé
+│   │   ├── 📁 extensions/
+│   │   │   ├── string_extensions.dart
+│   │   │   ├── date_extensions.dart
+│   │   │   ├── context_extensions.dart
+│   │   │   └── either_extensions.dart             # Functional programming
+│   │   └── 📁 functional/
+│   │       ├── either.dart                        # Result type: Left(erreur)/Right(succès)
+│   │       ├── option.dart                        # Some/None pattern
+│   │       └── failure.dart                       # Classe abstraite Failure
+│   │
+│   ├── 📁 data/                                   # COUCHE DONNÉES (Clean Architecture)
+│   │   ├── 📁 models/                             # Modèles JSON + Entités SQLCipher
+│   │   │   ├── 📁 local/                          # Entités SQLCipher (tables)
+│   │   │   │   ├── local_user_model.dart          # @JsonSerializable + drift
+│   │   │   │   ├── local_wallet_model.dart
+│   │   │   │   ├── local_token_model.dart
+│   │   │   │   ├── local_transaction_model.dart
+│   │   │   │   ├── local_sync_queue_model.dart
+│   │   │   │   ├── local_key_store_model.dart
+│   │   │   │   ├── local_audit_log_model.dart
+│   │   │   │   └── local_device_sync_state.dart
+│   │   │   ├── 📁 remote/                         # DTOs API (JSON ↔ Dart)
+│   │   │   │   ├── login_request_dto.dart
+│   │   │   │   ├── login_response_dto.dart
+│   │   │   │   ├── token_allocation_request_dto.dart
+│   │   │   │   ├── token_allocation_response_dto.dart
+│   │   │   │   ├── offline_payment_request_dto.dart
+│   │   │   │   ├── sync_request_dto.dart
+│   │   │   │   ├── sync_response_dto.dart
+│   │   │   │   ├── transaction_dto.dart
+│   │   │   │   ├── wallet_balance_dto.dart
+│   │   │   │   └── api_error_dto.dart
+│   │   │   └── 📁 mappers/                        # Conversion local ↔ remote ↔ domain
+│   │   │       ├── user_mapper.dart
+│   │   │       ├── wallet_mapper.dart
+│   │   │       ├── token_mapper.dart
+│   │   │       └── transaction_mapper.dart
+│   │   │
+│   │   ├── 📁 datasources/                        # Sources de données
+│   │   │   ├── 📁 local/
+│   │   │   │   ├── 📁 database/
+│   │   │   │   │   ├── sqlcipher_database.dart    # Singleton SQLCipher
+│   │   │   │   │   ├── database_tables.dart       # Définition schéma
+│   │   │   │   │   ├── database_migrations.dart   # Migration scripts
+│   │   │   │   │   └── database_helper.dart       # CRUD génériques
+│   │   │   │   ├── 📁 secure_storage/
+│   │   │   │   │   ├── secure_storage_service.dart          # flutter_secure_storage
+│   │   │   │   │   ├── keystore_service_android.dart          # Android Keystore
+│   │   │   │   │   ├── secure_enclave_service_ios.dart      # iOS Secure Enclave
+│   │   │   │   │   └── keychain_service_ios.dart             # iOS Keychain fallback
+│   │   │   │   ├── 📁 shared_prefs/
+│   │   │   │   │   └── shared_prefs_service.dart            # Settings non-sensibles
+│   │   │   │   └── 📁 file_storage/
+│   │   │   │       └── encrypted_file_storage.dart            # Fichiers chiffrés
+│   │   │   └── 📁 remote/
+│   │   │       ├── 📁 api/
+│   │   │       │   ├── api_client.dart            # Dio/Http configuré
+│   │   │       │   ├── api_interceptor.dart         # JWT refresh, retry, logging
+│   │   │       │   ├── api_endpoints.dart           # Centralisation URLs
+│   │   │       │   └── api_error_handler.dart       # Traitement erreurs HTTP
+│   │   │       ├── 📁 network/
+│   │   │       │   ├── network_info.dart            # Connectivity plus
+│   │   │       │   ├── network_interceptor.dart     # Offline queue injection
+│   │   │       │   └── certificate_pinning.dart     # SSL pinning
+│   │   │       └── 📁 websocket/
+│   │   │           └── sync_socket.dart             # WebSocket pour sync temps réel
+│   │   │
+│   │   └── 📁 repositories/                       # Implémentations repositories
+│   │       ├── auth_repository_impl.dart
+│   │       ├── wallet_repository_impl.dart
+│   │       ├── token_repository_impl.dart
+│   │       ├── transaction_repository_impl.dart
+│   │       ├── sync_repository_impl.dart
+│   │       └── audit_repository_impl.dart
+│   │
+│   ├── 📁 domain/                                 # COUCHE MÉTIER (indépendante)
+│   │   ├── 📁 entities/                           # Entités métier pures
+│   │   │   ├── user.dart
+│   │   │   ├── wallet.dart
+│   │   │   ├── token.dart
+│   │   │   ├── transaction.dart
+│   │   │   ├── device.dart
+│   │   │   └── sync_status.dart
+│   │   ├── 📁 repositories/                       # Interfaces (contrats)
+│   │   │   ├── auth_repository.dart
+│   │   │   ├── wallet_repository.dart
+│   │   │   ├── token_repository.dart
+│   │   │   ├── transaction_repository.dart
+│   │   │   ├── sync_repository.dart
+│   │   │   └── audit_repository.dart
+│   │   └── 📁 usecases/                           # Cas d'utilisation métier
+│   │       ├── 📁 auth/
+│   │       │   ├── login_usecase.dart
+│   │       │   ├── logout_usecase.dart
+│   │       │   ├── verify_pin_usecase.dart
+│   │       │   ├── set_biometric_usecase.dart
+│   │       │   └── refresh_session_usecase.dart
+│   │       ├── 📁 wallet/
+│   │       │   ├── get_balance_usecase.dart
+│   │       │   ├── get_offline_balance_usecase.dart
+│   │       │   ├── allocate_tokens_usecase.dart
+│   │       │   ├── request_credit_usecase.dart
+│   │       │   └── sync_wallet_usecase.dart
+│   │       ├── 📁 token/
+│   │       │   ├── get_available_tokens_usecase.dart
+│   │       │   ├── transfer_token_usecase.dart
+│   │       │   ├── receive_token_usecase.dart
+│   │       │   ├── validate_token_usecase.dart
+│   │       │   └── select_optimal_tokens_usecase.dart   # Algorithme sélection
+│   │       ├── 📁 transaction/
+│   │       │   ├── get_transaction_history_usecase.dart
+│   │       │   ├── execute_offline_payment_usecase.dart
+│   │       │   ├── execute_online_payment_usecase.dart
+│   │       │   └── refund_overpayment_usecase.dart
+│   │       ├── 📁 sync/
+│   │       │   ├── check_sync_status_usecase.dart
+│   │       │   ├── perform_sync_usecase.dart
+│   │       │   ├── resolve_sync_conflict_usecase.dart
+│   │       │   └── retry_failed_sync_usecase.dart
+│   │       └── 📁 offline/
+│   │           ├── enter_offline_mode_usecase.dart
+│   │           ├── exit_offline_mode_usecase.dart
+│   │           ├── generate_payment_qr_usecase.dart
+│   │           ├── scan_payment_qr_usecase.dart
+│   │           ├── generate_nfc_payload_usecase.dart
+│   │           └── receive_nfc_payment_usecase.dart
+│   │
+│   ├── 📁 presentation/                           # COUCHE PRÉSENTATION
+│   │   ├── 📁 blocs/                              # State Management (BLoC)
+│   │   │   ├── 📁 auth/
+│   │   │   │   ├── auth_bloc.dart
+│   │   │   │   ├── auth_event.dart
+│   │   │   │   ├── auth_state.dart
+│   │   │   │   └── auth_bloc_observer.dart
+│   │   │   ├── 📁 wallet/
+│   │   │   │   ├── wallet_bloc.dart
+│   │   │   │   ├── wallet_event.dart
+│   │   │   │   └── wallet_state.dart
+│   │   │   ├── 📁 token/
+│   │   │   │   ├── token_bloc.dart
+│   │   │   │   ├── token_event.dart
+│   │   │   │   └── token_state.dart
+│   │   │   ├── 📁 transaction/
+│   │   │   │   ├── transaction_bloc.dart
+│   │   │   │   ├── transaction_event.dart
+│   │   │   │   └── transaction_state.dart
+│   │   │   ├── 📁 sync/
+│   │   │   │   ├── sync_bloc.dart
+│   │   │   │   ├── sync_event.dart
+│   │   │   │   └── sync_state.dart
+│   │   │   ├── 📁 offline/
+│   │   │   │   ├── offline_bloc.dart
+│   │   │   │   ├── offline_event.dart
+│   │   │   │   └── offline_state.dart
+│   │   │   └── 📁 global/
+│   │   │       ├── connectivity_bloc.dart         # État réseau global
+│   │   │       ├── app_lifecycle_bloc.dart        # Foreground/background
+│   │   │       └── error_bloc.dart                # Gestion erreurs globales
+│   │   │
+│   │   ├── 📁 pages/                              # Écrans (Screens)
+│   │   │   ├── 📁 auth/
+│   │   │   │   ├── splash_page.dart
+│   │   │   │   ├── onboarding_page.dart
+│   │   │   │   ├── login_page.dart
+│   │   │   │   ├── pin_setup_page.dart
+│   │   │   │   ├── biometric_setup_page.dart
+│   │   │   │   └── forgot_pin_page.dart
+│   │   │   ├── 📁 home/
+│   │   │   │   ├── home_page.dart
+│   │   │   │   ├── dashboard_page.dart
+│   │   │   │   └── quick_actions_page.dart
+│   │   │   ├── 📁 wallet/
+│   │   │   │   ├── wallet_page.dart
+│   │   │   │   ├── balance_detail_page.dart
+│   │   │   │   ├── allocate_tokens_page.dart
+│   │   │   │   └── credit_request_page.dart
+│   │   │   ├── 📁 offline_payment/
+│   │   │   │   ├── offline_payment_page.dart
+│   │   │   │   ├── qr_display_page.dart           # Afficher QR (payer)
+│   │   │   │   ├── qr_scan_page.dart              # Scanner QR (recevoir)
+│   │   │   │   ├── nfc_payment_page.dart
+│   │   │   │   ├── payment_confirmation_page.dart
+│   │   │   │   └── payment_receipt_page.dart
+│   │   │   ├── 📁 transaction/
+│   │   │   │   ├── transaction_history_page.dart
+│   │   │   │   ├── transaction_detail_page.dart
+│   │   │   │   └── pending_transactions_page.dart
+│   │   │   ├── 📁 sync/
+│   │   │   │   ├── sync_status_page.dart
+│   │   │   │   ├── sync_progress_page.dart
+│   │   │   │   └── sync_conflict_resolution_page.dart
+│   │   │   ├── 📁 settings/
+│   │   │   │   ├── settings_page.dart
+│   │   │   │   ├── security_settings_page.dart
+│   │   │   │   ├── notification_settings_page.dart
+│   │   │   │   ├── language_settings_page.dart
+│   │   │   │   └── about_page.dart
+│   │   │   └── 📁 support/
+│   │   │       ├── help_center_page.dart
+│   │   │       └── contact_support_page.dart
+│   │   │
+│   │   ├── 📁 widgets/                            # Composants réutilisables
+│   │   │   ├── 📁 common/
+│   │   │   │   ├── pay_button.dart
+│   │   │   │   ├── pay_text_field.dart
+│   │   │   │   ├── pay_card.dart
+│   │   │   │   ├── pay_loading_indicator.dart
+│   │   │   │   ├── pay_error_widget.dart
+│   │   │   │   ├── pay_empty_state.dart
+│   │   │   │   └── pay_bottom_sheet.dart
+│   │   │   ├── 📁 auth/
+│   │   │   │   ├── pin_pad.dart
+│   │   │   │   ├── biometric_prompt.dart
+│   │   │   │   └── session_timeout_dialog.dart
+│   │   │   ├── 📁 wallet/
+│   │   │   │   ├── balance_card.dart
+│   │   │   │   ├── token_chip.dart
+│   │   │   │   ├── offline_balance_indicator.dart
+│   │   │   │   └── credit_limit_badge.dart
+│   │   │   ├── 📁 payment/
+│   │   │   │   ├── qr_display_widget.dart
+│   │   │   │   ├── qr_scanner_overlay.dart
+│   │   │   │   ├── nfc_animation_widget.dart
+│   │   │   │   ├── amount_input_field.dart
+│   │   │   │   ├── payment_summary_card.dart
+│   │   │   │   └── transaction_success_animation.dart
+│   │   │   ├── 📁 sync/
+│   │   │   │   ├── sync_status_badge.dart
+│   │   │   │   ├── sync_progress_bar.dart
+│   │   │   │   ├── pending_sync_counter.dart
+│   │   │   │   └── last_sync_info.dart
+│   │   │   └── 📁 offline/
+│   │   │       ├── offline_mode_banner.dart
+│   │   │       ├── offline_indicator.dart
+│   │   │       └── airplane_mode_hint.dart
+│   │   │
+│   │   └── 📁 navigation/                         # Routage
+│   │       ├── app_router.dart                    # GoRouter configuration
+│   │       ├── route_names.dart                   # Constantes routes
+│   │       ├── route_guards.dart                  # Auth guards, offline guards
+│   │       └── navigation_service.dart            # Navigation programmatique
+│   │
+│   ├── 📁 services/                               # SERVICES MÉTIER
+│   │   ├── 📁 crypto/
+│   │   │   ├── local_crypto_service.dart          # Chiffrement local AES-256-GCM
+│   │   │   ├── signature_service.dart             # ECDSA P-256 sign/verify
+│   │   │   ├── key_management_service.dart        # Import/usage clés server
+│   │   │   ├── token_verification_service.dart    # Vérifier signature token
+│   │   │   └── secure_random_service.dart         # Génération nonces
+│   │   ├── 📁 offline/
+│   │   │   ├── offline_manager.dart               # Orchestration mode offline
+│   │   │   ├── connectivity_monitor.dart          # Stream état réseau
+│   │   │   ├── offline_queue_processor.dart       # Traiter file offline
+│   │   │   └── offline_state_persistence.dart     # Sauvegarder état offline
+│   │   ├── 📁 nfc/
+│   │   │   ├── nfc_service.dart                   # Interface abstraite
+│   │   │   ├── nfc_android_service.dart             # Implémentation Android
+│   │   │   ├── nfc_ios_service.dart                 # Implémentation iOS (limitée)
+│   │   │   └── nfc_payload_builder.dart             # Construire payload NFC
+│   │   ├── 📁 qr/
+│   │   │   ├── qr_generator_service.dart            # Générer QR dynamique
+│   │   │   ├── qr_scanner_service.dart              # Scanner + validation
+│   │   │   ├── qr_payload_encoder.dart              # Encoder données QR
+│   │   │   └── qr_payload_decoder.dart              # Décoder + vérifier
+│   │   ├── 📁 sync/
+│   │   │   ├── sync_manager.dart                    # Orchestrateur sync
+│   │   │   ├── sync_scheduler.dart                  # Planification sync
+│   │   │   ├── sync_executor.dart                   # Exécution sync batch
+│   │   │   ├── conflict_resolver.dart               # Résolution conflits
+│   │   │   └── sync_retry_policy.dart               # Stratégie retry exponentiel
+│   │   ├── 📁 notification/
+│   │   │   ├── local_notification_service.dart      # Notifications locales
+│   │   │   └── push_notification_service.dart     # FCM/APNs
+│   │   └── 📁 background/
+│   │       ├── background_sync_service.dart         # WorkManager/BG Fetch
+│   │       └── background_crypto_service.dart       # Opérations crypto background
+│   │
+│   └── 📁 di/                                     # INJECTION DÉPENDANCES
+│       ├── injection.dart                         # GetIt setup
+│       ├── modules/
+│       │   ├── api_module.dart                    # Enregistrement API
+│       │   ├── database_module.dart               # SQLCipher singleton
+│       │   ├── crypto_module.dart                 # Services crypto
+│       │   ├── repository_module.dart             # Repositories
+│       │   ├── usecase_module.dart                # Use cases
+│       │   └── bloc_module.dart                   # BLoCs
+│       └── scopes/
+│           ├── auth_scope.dart
+│           └── offline_scope.dart
+│
+├── 📁 test/                                       # TESTS
+│   ├── 📁 unit/
+│   │   ├── 📁 domain/
+│   │   │   ├── usecases/
+│   │   │   └── entities/
+│   │   ├── 📁 data/
+│   │   │   ├── repositories/
+│   │   │   └── mappers/
+│   │   └── 📁 services/
+│   │       ├── crypto/
+│   │       └── sync/
+│   ├── 📁 widget/
+│   │   ├── 📁 pages/
+│   │   └── 📁 widgets/
+│   ├── 📁 integration/
+│   │   ├── 📁 flows/
+│   │   │   ├── offline_payment_flow_test.dart
+│   │   │   ├── sync_flow_test.dart
+│   │   │   └── auth_flow_test.dart
+│   │   └── 📁 database/
+│   │       └── sqlcipher_test.dart
+│   ├── 📁 mocks/
+│   │   ├── mock_repositories.dart
+│   │   ├── mock_services.dart
+│   │   └── fake_data.dart
+│   └── 📁 fixtures/
+│       ├── tokens_fixture.json
+│       ├── transactions_fixture.json
+│       └── api_responses_fixture.json
+│
+├── 📁 assets/                                     # RESSOURCES
+│   ├── 📁 images/
+│   │   ├── logo_paylogic.png
+│   │   ├── logo_paywallet_lite.png
+│   │   ├── illustration_offline.png
+│   │   ├── illustration_sync.png
+│   │   └── icons/
+│   ├── 📁 animations/
+│   │   ├── payment_success.json                   # Lottie
+│   │   ├── sync_complete.json
+│   │   └── nfc_wave.json
+│   ├── 📁 fonts/
+│   │   ├── Inter-Regular.ttf
+│   │   └── Inter-Bold.ttf
+│   └── 📁 certificates/
+│       └── paylogic_ca.pem                        # Certificat CA embarqué
+│
+├── pubspec.yaml
+├── analysis_options.yaml
+└── README_MOBILE.md
