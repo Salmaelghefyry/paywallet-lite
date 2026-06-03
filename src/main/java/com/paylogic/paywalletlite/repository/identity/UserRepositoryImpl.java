@@ -1,10 +1,18 @@
 package com.paylogic.paywalletlite.repository.identity;
 
 import com.paylogic.paywalletlite.domain.identity.User;
+<<<<<<< Updated upstream
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+=======
+import com.paylogic.paywalletlite.domain.identity.enums.AccountStatus;
+import com.paylogic.paywalletlite.domain.identity.enums.RoleType;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+>>>>>>> Stashed changes
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
