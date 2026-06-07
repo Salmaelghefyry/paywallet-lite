@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface CertificateRepository {
     Certificate save(Certificate certificate);
+    List<Certificate> findAll();
     Optional<Certificate> findById(UUID certificateId);
     Optional<Certificate> findByThumbprint(String thumbprint);
     List<Certificate> findByWalletId(UUID walletId);

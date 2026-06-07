@@ -48,6 +48,13 @@ public class CertificateRepositoryImpl implements CertificateRepository {
     }
 
     @Override
+    public List<Certificate> findAll() {
+        return entityManager.createQuery(
+                        "SELECT c FROM Certificate c ", Certificate.class)
+                .getResultList();
+    }
+
+    @Override
     public List<Certificate> findByWalletId(UUID walletId) {
         return entityManager.createQuery(
                         "SELECT c FROM Certificate c WHERE c.wallet.walletId = :wid", Certificate.class)

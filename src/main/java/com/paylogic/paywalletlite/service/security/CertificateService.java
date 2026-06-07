@@ -2,6 +2,7 @@ package com.paylogic.paywalletlite.service.security;
 
 import com.paylogic.paywalletlite.domain.crypto.Certificate;
 import com.paylogic.paywalletlite.domain.crypto.CertificateAuthority;
+import com.paylogic.paywalletlite.domain.crypto.enums.CertificateStatus;
 import com.paylogic.paywalletlite.domain.wallet.Wallet;
 import com.paylogic.paywalletlite.exception.BusinessException;
 
@@ -29,6 +30,16 @@ public interface CertificateService {
      * Récupère un certificat par ID.
      */
     Certificate findById(UUID certificateId) throws BusinessException;
+
+    /**
+     * Récupère un certificat par Status.
+     */
+    List<Certificate> findByStatus(CertificateStatus certificateStatus) throws BusinessException;
+
+    /**
+     * Récupère les certificats.
+     */
+    List<Certificate> findAll();
 
     /**
      * Récupère les certificats d'un wallet.

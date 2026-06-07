@@ -36,9 +36,9 @@ public class KeyRotationServiceImpl implements KeyRotationService {
 
     @Override
     @Transactional
-    public ServerKey rotateKey(ServerKeyPurpose purpose) throws BusinessException {
+    public ServerKey rotateKey(UUID serverKeyId, ServerKeyPurpose purpose) throws BusinessException {
         // Récupérer la clé active actuelle
-        ServerKey currentKey = cryptographicService.getActiveKey(purpose);
+        ServerKey currentKey = cryptographicService.findById(serverKeyId);
 
         // Marquer l'ancienne clé comme PENDING_ROTATION
         currentKey.setStatus(ServerKeyStatus.PENDING_ROTATION);
@@ -66,7 +66,7 @@ public class KeyRotationServiceImpl implements KeyRotationService {
 
         for (ServerKey key : expiringKeys) {
             try {
-                rotateKey(key.getKeyPurpose());
+                rotateKey(key.getServerKeyId(), key.getKeyPurpose());
             } catch (BusinessException e) {
                 System.err.println("Failed to rotate key " + key.getServerKeyId() + ": " + e.getMessage());
             }

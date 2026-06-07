@@ -1,173 +1,221 @@
 package com.paylogic.paywalletlite.controller.auth;
 
 import com.paylogic.paywalletlite.domain.identity.User;
-import com.paylogic.paywalletlite.domain.identity.enums.AccountStatus;
-import com.paylogic.paywalletlite.domain.identity.enums.RoleType;
-import com.paylogic.paywalletlite.dto.request.RegisterRequestDto;
-import com.paylogic.paywalletlite.dto.request.UpdateUserRequestDto;
+import com.paylogic.paywalletlite.dto.request.UpdateProfileRequestDto;
 import com.paylogic.paywalletlite.dto.response.ApiErrorResponseDto;
+import com.paylogic.paywalletlite.dto.response.UserProfileResponseDto;
 import com.paylogic.paywalletlite.exception.BusinessException;
+import com.paylogic.paywalletlite.mapper.UserMapper;
+import com.paylogic.paywalletlite.security.AuthenticationFacade;
 import com.paylogic.paywalletlite.service.identity.UserService;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Contrôleur REST pour les opérations utilisateur sur son propre compte.
+ *
+ * Tous les endpoints utilisent l'identité de l'utilisateur connecté
+ * via le JWT. L'utilisateur ne peut gérer que son propre profil.
+ *
+ * Route de base : /v1/users
+ */
 @RestController
 @RequestMapping("/v1/users")
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationFacade authenticationFacade;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          AuthenticationFacade authenticationFacade,
+                          UserMapper userMapper) {
         this.userService = userService;
+        this.authenticationFacade = authenticationFacade;
+        this.userMapper = userMapper;
     }
 
-    // ==================== CREATE ====================
+    // ============================================================
+    // CONSULTATION DE SON PROPRE PROFIL
+    // ============================================================
 
-    @PostMapping
-    public ResponseEntity<?> createUser(@Valid @RequestBody RegisterRequestDto request) {
+    /**
+     * GET /v1/users/me
+     *
+     * Retourne le profil complet de l'utilisateur connecté.
+     *
+     * @return UserProfileResponseDto
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponseDto> getMyProfile() {
+        UUID currentUserId = authenticationFacade.getCurrentUserId();
+        User user = userService.findById(currentUserId);
+        return ResponseEntity.ok(userMapper.toProfileResponseDto(user));
+    }
+
+    /**
+     * GET /v1/users/me/status
+     *
+     * Retourne le statut du compte de l'utilisateur connecté.
+     *
+     * @return Statut du compte
+     */
+    @GetMapping("/me/status")
+    public ResponseEntity<?> getMyAccountStatus() {
+        UUID currentUserId = authenticationFacade.getCurrentUserId();
+        User user = userService.findById(currentUserId);
+
+        Map<String, Object> status = new HashMap<>();
+        status.put("userId", user.getUserId());
+        status.put("accountStatus", user.getStatus());
+        status.put("kycStatus", user.getKycVerificationStatus());
+        status.put("isLocked", userService.isAccountLocked(currentUserId));
+        status.put("failedLoginAttempts", user.getFailedLoginAttempts());
+        status.put("lastLogin", user.getLastLogin());
+        status.put("role", user.getRole());
+
+        return ResponseEntity.ok(status);
+    }
+
+    /**
+     * GET /v1/users/me/kyc-status
+     *
+     * Retourne le statut KYC de l'utilisateur connecté.
+     *
+     * @return Statut KYC
+     */
+    @GetMapping("/me/kyc-status")
+    public ResponseEntity<?> getMyKycStatus() {
+        UUID currentUserId = authenticationFacade.getCurrentUserId();
+        User user = userService.findById(currentUserId);
+
+        Map<String, Object> kyc = new HashMap<>();
+        kyc.put("kycStatus", user.getKycVerificationStatus());
+        kyc.put("userId", user.getUserId());
+
+        return ResponseEntity.ok(kyc);
+    }
+
+    // ============================================================
+    // MISE À JOUR DE SON PROPRE PROFIL
+    // ============================================================
+
+    /**
+     * PUT /v1/users/me
+     *
+     * Met à jour le profil de l'utilisateur connecté.
+     * Ne permet pas de changer le rôle, le statut, ou les informations sensibles.
+     *
+     * @param request DTO contenant les champs modifiables
+     * @return Profil mis à jour
+     */
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMyProfile(@Valid @RequestBody UpdateProfileRequestDto request) {
         try {
-            User user = userService.registerUser(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+            UUID currentUserId = authenticationFacade.getCurrentUserId();
+            User updatedUser = userService.updateProfile(currentUserId, request);
+            return ResponseEntity.ok(userMapper.toProfileResponseDto(updatedUser));
         } catch (BusinessException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiErrorResponseDto("ERROR", e.getMessage(), null));
         }
     }
 
-    // ==================== READ ====================
-
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.findAll());
-    }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable UUID userId) {
+    /**
+     * PUT /v1/users/me/password
+     *
+     * Change le mot de passe de l'utilisateur connecté.
+     *
+     * @param currentPassword Mot de passe actuel
+     * @param newPassword     Nouveau mot de passe
+     * @return Confirmation
+     */
+    @PutMapping("/me/password")
+    public ResponseEntity<?> changeMyPassword(
+            @RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword) {
         try {
-            return ResponseEntity.ok(userService.findById(userId));
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
-        }
-    }
-
-    @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<?> getUserByPhone(@PathVariable String phoneNumber) {
-        try {
-            return ResponseEntity.ok(userService.findByPhoneNumber(phoneNumber));
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
-        }
-    }
-
-    @GetMapping("/email/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
-        try {
-            return ResponseEntity.ok(userService.findByEmail(email));
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
-        }
-    }
-
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<User>> getUsersByStatus(@PathVariable AccountStatus status) {
-        return ResponseEntity.ok(userService.findByStatus(status));
-    }
-
-    @GetMapping("/role/{role}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable RoleType role) {
-        return ResponseEntity.ok(userService.findByRole(role));
-    }
-
-    @GetMapping("/{userId}/locked")
-    public ResponseEntity<?> isAccountLocked(@PathVariable UUID userId) {
-        try {
-            boolean locked = userService.isAccountLocked(userId);
-            Map<String, String> details = new HashMap<>();
-            details.put("locked", String.valueOf(locked));
-
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS",
-                    locked ? "Account is locked" : "Account is not locked", details));
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
-        }
-    }
-
-    // ==================== UPDATE ====================
-
-    @PutMapping("/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable UUID userId,
-                                        @Valid @RequestBody UpdateUserRequestDto request) {
-        try {
-            // Implémentation à ajouter dans UserService si besoin
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS", "User updated", null));
+            UUID currentUserId = authenticationFacade.getCurrentUserId();
+            userService.changePassword(currentUserId, currentPassword, newPassword);
+            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS", "Password changed successfully", null));
         } catch (BusinessException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiErrorResponseDto("ERROR", e.getMessage(), null));
         }
     }
 
-    @PutMapping("/{userId}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable UUID userId,
-                                          @RequestParam AccountStatus status) {
+    /**
+     * PUT /v1/users/me/pin
+     *
+     * Change le code PIN de l'utilisateur connecté.
+     *
+     * @param currentPin PIN actuel
+     * @param newPin     Nouveau PIN
+     * @return Confirmation
+     */
+    @PutMapping("/me/pin")
+    public ResponseEntity<?> changeMyPin(
+            @RequestParam("currentPin") String currentPin,
+            @RequestParam("newPin") String newPin) {
         try {
-            userService.updateStatus(userId, status);
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS",
-                    "Status updated to " + status, null));
+            UUID currentUserId = authenticationFacade.getCurrentUserId();
+            userService.changePin(currentUserId, currentPin, newPin);
+            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS", "PIN changed successfully", null));
         } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiErrorResponseDto("ERROR", e.getMessage(), null));
         }
     }
 
-    @PostMapping("/{userId}/lock")
-    public ResponseEntity<?> lockAccount(@PathVariable UUID userId,
-                                         @RequestParam(defaultValue = "30") int minutes) {
+    // ============================================================
+    // GESTION DU COMPTE
+    // ============================================================
+
+    /**
+     * POST /v1/users/me/deactivate
+     *
+     * Désactive temporairement le compte de l'utilisateur connecté.
+     *
+     * @return Confirmation
+     */
+    @PostMapping("/me/deactivate")
+    public ResponseEntity<?> deactivateMyAccount() {
         try {
-            userService.lockAccount(userId, minutes);
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS",
-                    "Account locked for " + minutes + " minutes", null));
+            UUID currentUserId = authenticationFacade.getCurrentUserId();
+            userService.deactivateAccount(currentUserId);
+            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS", "Account deactivated successfully", null));
         } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiErrorResponseDto("ERROR", e.getMessage(), null));
         }
     }
 
-    @PostMapping("/{userId}/unlock")
-    public ResponseEntity<?> unlockAccount(@PathVariable UUID userId) {
+    /**
+     * POST /v1/users/me/request-closure
+     *
+     * Demande la fermeture définitive du compte.
+     * Nécessite une validation administrative.
+     *
+     * @param reason Raison de la fermeture
+     * @return Confirmation
+     */
+    @PostMapping("/me/request-closure")
+    public ResponseEntity<?> requestAccountClosure(@RequestParam("reason") String reason) {
         try {
-            userService.unlockAccount(userId);
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS",
-                    "Account unlocked", null));
+            UUID currentUserId = authenticationFacade.getCurrentUserId();
+            userService.requestAccountClosure(currentUserId, reason);
+            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS", "Account closure requested", null));
         } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
-        }
-    }
-
-    // ==================== DELETE ====================
-
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable UUID userId) {
-        try {
-            userService.deleteUser(userId);
-            return ResponseEntity.ok(new ApiErrorResponseDto("SUCCESS",
-                    "User deleted successfully", null));
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponseDto("NOT_FOUND", e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiErrorResponseDto("ERROR", e.getMessage(), null));
         }
     }
 }

@@ -13,6 +13,8 @@ public interface WalletRepository {
 
     Optional<Wallet> findById(UUID walletId);
 
+    List<Wallet> findAll();
+
     List<Wallet> findByUserId(UUID userId);
 
     List<Wallet> findByUserIdAndStatus(UUID userId, WalletStatus status);
@@ -24,4 +26,6 @@ public interface WalletRepository {
     long countByUserId(UUID userId);
 
     void delete(Wallet wallet);
+
+    List<UUID> getWalletIdsByUserId(UUID userId);
 }

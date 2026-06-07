@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface ServerKeyRepository {
     ServerKey save(ServerKey serverKey);
+    List<ServerKey> findAll();
     Optional<ServerKey> findById(UUID serverKeyId);
     Optional<ServerKey> findActiveByPurpose(ServerKeyPurpose purpose);
     List<ServerKey> findByStatus(ServerKeyStatus status);

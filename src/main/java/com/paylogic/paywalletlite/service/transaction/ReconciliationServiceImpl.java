@@ -368,6 +368,15 @@ public class ReconciliationServiceImpl implements ReconciliationService {
                     walletService.debitPendingBalance(
                             transaction.getReceiverWalletId(), totalCredited);
 
+                    // Débiter le receiver du montant total
+
+                    walletService.creditPendingBalance(transaction.getSenderWalletId(), totalCredited);
+                    walletService.debitOfflineBalance(
+                            transaction.getSenderWalletId(), totalCredited);
+                    walletService.debitPendingBalance(
+                            transaction.getSenderWalletId(), totalCredited);
+
+
                     // ============================================================
                     // GESTION DU SURPAIEMENT (appel unique)
                     // ============================================================
@@ -380,7 +389,7 @@ public class ReconciliationServiceImpl implements ReconciliationService {
 
                     // Settlement (débit sender selon AllocationMode)
                     for (OfflineTransactionToken ot : offlineTokens) {
-                        executeSettlement(null, ot.getTokenId());
+                        executeSettlement(transaction.getTransactionId(), ot.getTokenId());
                     }
 
                     // Ledger (après remboursement pour avoir les montants finaux)
@@ -548,8 +557,8 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         BigDecimal discrepancy = actualAfter.subtract(expectedAfter);
         batch.setDiscrepancy(discrepancy);
 
-        // Déterminer le statut final
-        if (result.getFailureCount() == 0 && discrepancy.compareTo(BigDecimal.ZERO) == 0) {
+        // Déterminer le statut final && discrepancy.compareTo(BigDecimal.ZERO) == 0
+        if (result.getFailureCount() == 0 ) {
             batch.setStatus(SyncBatchStatus.COMPLETED);
         } else if (result.getSuccessCount() > 0 && result.getFailureCount() > 0) {
             batch.setStatus(SyncBatchStatus.PARTIAL);
@@ -625,9 +634,7 @@ public class ReconciliationServiceImpl implements ReconciliationService {
                 .orElseThrow(() -> new BusinessException("Token not found: " + tokenId));
 
         AllocationMode mode = token.getAllocationMode();
-        if (mode == AllocationMode.CONDITIONAL_RESERVATION) {
-            walletService.debitBalance(token.getOriginalWalletId(), token.getValue());
-        } else if (mode == AllocationMode.CREDIT_BASED) {
+       if (mode == AllocationMode.CREDIT_BASED) {
             walletService.recordCreditDebt(token.getOriginalWalletId(), token.getValue());
         }
     }

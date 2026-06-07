@@ -126,6 +126,18 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
+    public List<Certificate> findByStatus(CertificateStatus certificateStatus) throws BusinessException {
+        return certificateRepository.findByStatus(certificateStatus);
+    }
+
+
+    @Override
+    public List<Certificate> findAll() {
+        return certificateRepository.findAll();
+    }
+
+
+    @Override
     public List<Certificate> findByWalletId(UUID walletId) {
         return certificateRepository.findByWalletId(walletId);
     }

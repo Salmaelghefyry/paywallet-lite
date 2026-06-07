@@ -55,6 +55,10 @@ public interface AuditService {
      */
     List<AuditLog> findByEventType(AuditEventType eventType);
 
+    List<AuditLog> findByActorId(UUID actorId);
+
+    AuditLog findById(UUID auditId);
+
     /**
      * Vérifie l'intégrité de la chaîne d'audit.
      */
