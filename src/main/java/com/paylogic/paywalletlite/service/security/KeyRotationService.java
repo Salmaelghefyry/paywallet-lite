@@ -12,7 +12,7 @@ public interface KeyRotationService {
     /**
      * Effectue la rotation d'une clé spécifique.
      */
-    ServerKey rotateKey(ServerKeyPurpose purpose) throws BusinessException;
+    ServerKey rotateKey(UUID serverKeyId, ServerKeyPurpose purpose) throws BusinessException;
 
     /**
      * Vérifie et rotate les clés proches de l'expiration.

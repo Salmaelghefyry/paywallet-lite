@@ -25,4 +25,13 @@ public interface UserRepository {
     void resetFailedAttempts(UUID userId);
     void lockAccount(UUID userId, java.time.LocalDateTime lockedUntil);
     void updateStatus(UUID userId, AccountStatus status);
+    /**
+     * Recherche des utilisateurs par statut KYC.
+     */
+    List<User> findByKycVerificationStatus(String kycStatus);
+
+    /**
+     * Recherche multi-critères (nom, prénom, téléphone, email).
+     */
+    List<User> searchByTerm(String searchTerm);
 }

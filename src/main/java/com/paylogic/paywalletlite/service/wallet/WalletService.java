@@ -24,6 +24,8 @@ public interface WalletService {
 
     List<WalletResponseDto> getPendingWallets();
 
+    List<WalletResponseDto> getWallets();
+
 
     WalletResponseDto rejectWallet(UUID walletId, String reason);
 
@@ -110,6 +112,7 @@ public interface WalletService {
      */
     boolean existsById(UUID walletId);
 
+
     /**
      * Récupère le solde online d'un wallet.
      */
@@ -124,6 +127,11 @@ public interface WalletService {
      * Débite le solde online d'un wallet.
      */
     void debitBalance(UUID walletId, BigDecimal amount);
+
+    /**
+     * Débite le solde offline d'un wallet.
+     */
+    void debitOfflineBalance(UUID walletId, BigDecimal amount);
 
 
     /**
@@ -140,4 +148,6 @@ public interface WalletService {
      * Enregistre une dette de crédit sur un wallet.
      */
     void recordCreditDebt(UUID walletId, BigDecimal amount);
+
+    List<UUID> getWalletIdsByUserId(UUID userId);
 }

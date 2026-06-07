@@ -1,5 +1,6 @@
 package com.paylogic.paywalletlite.controller.admin;
 
+import com.paylogic.paywalletlite.dto.request.CreateWalletRequestDto;
 import com.paylogic.paywalletlite.dto.request.FundWalletRequestDto;
 import com.paylogic.paywalletlite.dto.request.WalletConfigUpdateRequestDto;
 import com.paylogic.paywalletlite.dto.response.WalletConfigResponseDto;
@@ -48,6 +49,32 @@ public class AdminWalletController {
     // ============================================================
     // CONSULTATION (ADMIN)
     // ============================================================
+
+    /**
+     * GET /v1/admin/wallets
+     *
+     * Liste tous les wallets.
+     * Réservé aux administrateurs.
+     *
+     * @return Liste de WalletResponseDto
+     */
+    @GetMapping
+    public ResponseEntity<List<WalletResponseDto>> getWallets() {
+        assertAdminAccess();
+        List<WalletResponseDto> wallets = walletService.getWallets();
+        return ResponseEntity.ok(wallets);
+    }
+
+
+    @PostMapping("/{userId}")
+    public ResponseEntity<WalletResponseDto> walletCreation(
+            @PathVariable UUID userId,
+            @Valid @RequestBody CreateWalletRequestDto request) {
+
+        WalletResponseDto response = walletService.requestWalletCreation(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
     /**
      * GET /v1/admin/wallets/pending

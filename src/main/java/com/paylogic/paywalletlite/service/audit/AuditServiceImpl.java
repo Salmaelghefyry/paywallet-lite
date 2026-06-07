@@ -18,10 +18,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Implémentation du service d'audit centralisé.
@@ -117,6 +114,16 @@ public class AuditServiceImpl implements AuditService {
     @Transactional(readOnly = true)
     public List<AuditLog> findByEventType(AuditEventType eventType) {
         return auditLogRepository.findByEventType(eventType);
+    }
+
+    @Override
+    public List<AuditLog> findByActorId(UUID actorId) {
+        return auditLogRepository.findByActorId(actorId);
+    }
+
+    @Override
+    public AuditLog findById(UUID auditId) {
+        return auditLogRepository.findById(auditId).get();
     }
 
     @Override

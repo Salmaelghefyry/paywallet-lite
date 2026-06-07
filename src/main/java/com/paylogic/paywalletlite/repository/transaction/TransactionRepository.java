@@ -4,6 +4,7 @@ import com.paylogic.paywalletlite.domain.transaction.Transaction;
 import com.paylogic.paywalletlite.domain.transaction.enums.TransactionStatus;
 import com.paylogic.paywalletlite.domain.transaction.enums.TransactionType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,4 +38,18 @@ public interface TransactionRepository {
     void updateStatus(UUID transactionId, TransactionStatus newStatus);
 
     void updateSyncBatchId(UUID transactionId, UUID syncBatchId);
+
+    // Ajouter ces méthodes à l'interface TransactionRepository :
+
+    /** Transactions offline d'un wallet */
+    List<Transaction> findOfflineByWalletId(UUID walletId);
+
+
+    /** Toutes les transactions triées */
+    List<Transaction> findAll();
+
+    /** Transactions par plage de dates */
+    List<Transaction> findByInitiatedAtBetween(LocalDateTime fromDate, LocalDateTime toDate);
+
+
 }

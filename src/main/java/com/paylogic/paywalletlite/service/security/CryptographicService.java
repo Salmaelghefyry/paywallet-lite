@@ -21,6 +21,11 @@ public interface CryptographicService {
     String signData(String data, UUID serverKeyId) throws BusinessException;
 
     /**
+     * Liste les clés.
+     */
+    List<ServerKey> findAll();
+
+    /**
      * Récupère la clé active pour un usage donné.
      */
     ServerKey getActiveKey(ServerKeyPurpose purpose) throws BusinessException;

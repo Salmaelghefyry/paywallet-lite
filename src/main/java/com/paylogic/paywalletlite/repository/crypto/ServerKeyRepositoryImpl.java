@@ -32,6 +32,13 @@ public class ServerKeyRepositoryImpl implements ServerKeyRepository {
     }
 
     @Override
+    public List<ServerKey> findAll() {
+        return entityManager.createQuery(
+                        "SELECT sk FROM ServerKey sk ", ServerKey.class)
+                .getResultList();
+    }
+
+    @Override
     public Optional<ServerKey> findById(UUID serverKeyId) {
         return Optional.ofNullable(entityManager.find(ServerKey.class, serverKeyId));
     }

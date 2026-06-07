@@ -165,4 +165,30 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("id", userId)
                 .executeUpdate();
     }
+
+    // Ajouter ces méthodes à UserRepositoryImpl
+
+    @Override
+    public List<User> findByKycVerificationStatus(String kycStatus) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.kycVerificationStatus = :kycStatus ORDER BY u.registrationTimestamp DESC",
+                User.class);
+        query.setParameter("kycStatus", kycStatus);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<User> searchByTerm(String searchTerm) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE " +
+                        "LOWER(u.firstName) LIKE LOWER(:term) OR " +
+                        "LOWER(u.lastName) LIKE LOWER(:term) OR " +
+                        "u.phoneNumber LIKE :term OR " +
+                        "LOWER(u.email) LIKE LOWER(:term) " +
+                        "ORDER BY u.lastName ASC, u.firstName ASC",
+                User.class);
+        query.setParameter("term", "%" + searchTerm + "%");
+        query.setMaxResults(50);
+        return query.getResultList();
+    }
 }

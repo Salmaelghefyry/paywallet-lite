@@ -4,6 +4,7 @@ import com.paylogic.paywalletlite.domain.identity.Device;
 import com.paylogic.paywalletlite.domain.identity.User;
 import com.paylogic.paywalletlite.domain.identity.enums.*;
 import com.paylogic.paywalletlite.dto.request.RegisterRequestDto;
+import com.paylogic.paywalletlite.dto.request.UpdateProfileRequestDto;
 import com.paylogic.paywalletlite.exception.BusinessException;
 import com.paylogic.paywalletlite.repository.identity.DeviceRepository;
 import com.paylogic.paywalletlite.repository.identity.UserRepository;
@@ -172,4 +173,127 @@ public class UserServiceImpl implements UserService {
         User user = findById(userId);
         return user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now());
     }
+
+    // ============================================================
+// Ajouter ces méthodes à UserServiceImpl existant
+// ============================================================
+
+    @Override
+    public List<User> findByKycStatus(String kycStatus) {
+        return userRepository.findByKycVerificationStatus(kycStatus);
+    }
+
+    @Override
+    public List<User> searchUsers(String searchTerm) {
+        return userRepository.searchByTerm(searchTerm);
+    }
+
+    @Override
+    @Transactional
+    public User updateProfile(UUID userId, UpdateProfileRequestDto request) throws BusinessException {
+        User user = findById(userId);
+
+        if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) {
+            user.setFirstName(request.getFirstName().trim());
+        }
+        if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) {
+            user.setLastName(request.getLastName().trim());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            // Vérifier que l'email n'est pas déjà utilisé par un autre utilisateur
+            if (!request.getEmail().equals(user.getEmail())
+                    && userRepository.existsByEmail(request.getEmail())) {
+                throw new BusinessException("Email already in use by another account: " + request.getEmail());
+            }
+            user.setEmail(request.getEmail().trim());
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID userId, String currentPassword, String newPassword) throws BusinessException {
+        User user = findById(userId);
+
+        // Vérifier le mot de passe actuel
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new BusinessException("Current password is incorrect");
+        }
+
+        // Valider le nouveau mot de passe
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new BusinessException("New password must be at least 8 characters");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePin(UUID userId, String currentPin, String newPin) throws BusinessException {
+        User user = findById(userId);
+
+        // Vérifier le PIN actuel
+        if (user.getPinHash() == null || !passwordEncoder.matches(currentPin, user.getPinHash())) {
+            throw new BusinessException("Current PIN is incorrect");
+        }
+
+        // Valider le nouveau PIN
+        if (newPin == null || !newPin.matches("\\d{4,6}")) {
+            throw new BusinessException("New PIN must be 4 to 6 digits");
+        }
+
+        user.setPinHash(passwordEncoder.encode(newPin));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateAccount(UUID userId) throws BusinessException {
+        User user = findById(userId);
+        if (user.getStatus() == AccountStatus.CLOSED) {
+            throw new BusinessException("Cannot deactivate a closed account");
+        }
+        user.setStatus(AccountStatus.SUSPENDED);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void requestAccountClosure(UUID userId, String reason) throws BusinessException {
+        User user = findById(userId);
+        if (user.getStatus() == AccountStatus.CLOSED) {
+            throw new BusinessException("Account is already closed");
+        }
+        // La fermeture est immédiate (peut être changé en workflow d'approbation)
+        user.setStatus(AccountStatus.CLOSED);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateRole(UUID userId, RoleType newRole) {
+        User user = findById(userId);
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void approveKyc(UUID userId) {
+        User user = findById(userId);
+        user.setKycVerificationStatus(KYCStatus.VERIFIED);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void rejectKyc(UUID userId, String reason) {
+        User user = findById(userId);
+        user.setKycVerificationStatus(KYCStatus.PENDING);
+        userRepository.save(user);
+    }
+
 }

@@ -171,6 +171,14 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    public List<WalletResponseDto> getWallets() {
+        return walletRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public WalletResponseDto approveWallet(UUID walletId) {
         Wallet wallet = walletRepository.findById(walletId)
@@ -784,6 +792,34 @@ public class WalletServiceImpl implements WalletService {
         );
     }
 
+    @Override
+    @Transactional
+    public void debitOfflineBalance(UUID walletId, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Debit amount must be positive");
+        }
+
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new BusinessException("Wallet not found: " + walletId));
+
+        BigDecimal currentBalance = wallet.getOfflineBalance() != null ? wallet.getOfflineBalance() : BigDecimal.ZERO;
+        if (currentBalance.compareTo(amount) < 0) {
+            throw new BusinessException("Insufficient funds. Balance: " + currentBalance + ", Required: " + amount);
+        }
+
+        wallet.setOfflineBalance(currentBalance.subtract(amount));
+        walletRepository.save(wallet);
+
+        auditService.logEvent(
+                AuditEventType.WALLET_DEBITED,
+                wallet.getUserId(),
+                "SYSTEM",
+                walletId,
+                "WALLET",
+                "Offline Balance debited: -" + amount + ". New offline balance: " + wallet.getOfflineBalance()
+        );
+    }
+
 
     @Override
     @Transactional
@@ -862,6 +898,11 @@ public class WalletServiceImpl implements WalletService {
         );
     }
 
+    @Override
+    public List<UUID> getWalletIdsByUserId(UUID userId) {
+
+        return walletRepository.getWalletIdsByUserId(userId);
+    }
 
 
     private WalletConfig createDefaultWalletConfig(WalletType type) {

@@ -113,6 +113,11 @@ public class CryptographicServiceImpl implements CryptographicService {
     }
 
     @Override
+    public List<ServerKey> findAll() {
+        return serverKeyRepository.findAll();
+    }
+
+    @Override
     public List<ServerKey> findByStatus(ServerKeyStatus status) {
         return serverKeyRepository.findByStatus(status);
     }

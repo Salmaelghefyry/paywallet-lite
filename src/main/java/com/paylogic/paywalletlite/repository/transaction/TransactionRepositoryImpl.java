@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -130,13 +131,44 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 .executeUpdate();
     }
 
+
     @Override
-    @Transactional
+    public List<Transaction> findOfflineByWalletId(UUID walletId) {
+        TypedQuery<Transaction> query = entityManager.createQuery(
+                "SELECT t FROM Transaction t WHERE t.isOffline = true " +
+                        "AND (t.senderWalletId = :walletId OR t.receiverWalletId = :walletId) " +
+                        "ORDER BY t.initiatedAt DESC",
+                Transaction.class);
+        query.setParameter("walletId", walletId);
+        return query.getResultList();
+    }
+
+
+    @Override
+    public List<Transaction> findAll() {
+        TypedQuery<Transaction> query = entityManager.createQuery(
+                "SELECT t FROM Transaction t ORDER BY t.initiatedAt DESC",
+                Transaction.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Transaction> findByInitiatedAtBetween(LocalDateTime fromDate, LocalDateTime toDate) {
+        TypedQuery<Transaction> query = entityManager.createQuery(
+                "SELECT t FROM Transaction t WHERE t.initiatedAt BETWEEN :fromDate AND :toDate " +
+                        "ORDER BY t.initiatedAt DESC",
+                Transaction.class);
+        query.setParameter("fromDate", fromDate);
+        query.setParameter("toDate", toDate);
+        return query.getResultList();
+    }
+
+    @Override
     public void updateSyncBatchId(UUID transactionId, UUID syncBatchId) {
         entityManager.createQuery(
-                        "UPDATE Transaction t SET t.syncBatchId = :batchId WHERE t.transactionId = :id")
+                        "UPDATE Transaction t SET t.syncBatchId = :batchId WHERE t.transactionId = :txId")
                 .setParameter("batchId", syncBatchId)
-                .setParameter("id", transactionId)
+                .setParameter("txId", transactionId)
                 .executeUpdate();
     }
 }

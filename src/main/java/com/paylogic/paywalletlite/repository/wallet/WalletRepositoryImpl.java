@@ -28,6 +28,14 @@ public class WalletRepositoryImpl implements WalletRepository {
     }
 
     @Override
+    public List<Wallet> findAll() {
+        TypedQuery<Wallet> query = entityManager.createQuery(
+                "SELECT w FROM Wallet w ORDER BY w.createdAt DESC", Wallet.class);
+        return query.getResultList();
+    }
+
+
+    @Override
     public Optional<Wallet> findById(UUID walletId) {
         Wallet wallet = entityManager.find(Wallet.class, walletId);
         return Optional.ofNullable(wallet);
@@ -82,5 +90,14 @@ public class WalletRepositoryImpl implements WalletRepository {
         } else {
             entityManager.remove(entityManager.merge(wallet));
         }
+    }
+
+    @Override
+    public List<UUID> getWalletIdsByUserId(UUID userId) {
+        TypedQuery<UUID> query = entityManager.createQuery(
+                "SELECT w.walletId FROM Wallet w WHERE w.userId = :userId",
+                UUID.class);
+        query.setParameter("userId", userId);
+        return query.getResultList();
     }
 }
